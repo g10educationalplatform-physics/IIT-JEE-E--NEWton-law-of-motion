@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title> Quiz – 2. Newton’s First Law Inertia of rest Inertia of motion Inertia of direction</title>
+  <style>
+    body{font-family:Arial, sans-serif;padding:20px;background:#121212;color:#f0f0f0;}
+    #logo{display:block;margin:0 auto 25px;max-width:180px;}
+    #name-container{background:#1e1e1e;padding:30px;border-radius:6px;max-width:420px;margin:0 auto;}
+    #name-container input{width:100%;padding:10px;margin:10px 0 15px;border:none;border-radius:4px;font-size:16px;}
+    #quiz-container{display:none;}
+    .question{border:1px solid #333;padding:15px;margin-bottom:20px;border-radius:5px;background:#1e1e1e;}
+    .question h3{margin:0 0 10px;}
+    /* each option is a label-row: radio + text on same line, one option per row */
+    .option-item {
+      display: flex;                 /* radio + text in same line */
+      align-items: center;
+      gap: 8px;                      /* spacing between radio and text */
+      margin: 6px 0;                 /* space between options */
+      padding: 6px 8px;
+      border-radius: 4px;
+      background: #2a2a2a;
+      color: #ccc;
+      cursor: pointer;
+    }
+    .option-item input[type="radio"] {
+      margin: 0;                     /* no extra offset */
+    }
+    .submit-button,.toggle-button,.dontknow-button{margin-top:10px;padding:6px 12px;background:#007BFF;color:#fff;border:none;border-radius:4px;cursor:pointer;margin-right:5px;}
+    .solution{display:none;margin-top:10px;background:#2d2d2d;padding:10px;border-left:4px solid #28a745;}
+    #scorecard{background:#2d2d2d;padding:15px;border-radius:6px;margin-top:30px;display:none;}
+    #timer{font-weight:bold;color:#00ffcc;}
+    #studentPrintName{text-align:center;font-size:18px;font-weight:bold;margin-top:-15px;margin-bottom:5px;display:none;}
+    #examDateTime{text-align:center;font-size:14px;margin-bottom:20px;display:none;}
+    @media print {
+      body { background: #fff; color:#000; }
+      .submit-button, .dontknow-button, .toggle-button, #reportBtn, #reportModal { display:none !important; }
+      #name-container { display:none !important; }
+    }
+
+    /* 🔹 Floating Report Button */
+    #reportBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ff4757;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+
+    /* 🔹 Popup Modal */
+    #reportModal {
+      display: none;
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: #1e1e1e;
+      border: 1px solid #444;
+      padding: 15px;
+      border-radius: 8px;
+      width: 260px;
+      z-index: 1001;
+    }
+    #reportModal textarea {
+      width: 100%;
+      height: 80px;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      resize: none;
+      font-size: 14px;
+    }
+    #reportModal button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #sendReport { background: #28a745; color: white; }
+    #closeReport { background: #dc3545; color: white; margin-left: 5px; }
+  </style>
+  <!-- MathJax -->
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<img id="logo" src="https://i.ibb.co/WNZTWPwv/LOGO-PNG-2025-fab.png" alt="Logo" />
+
+<div id="studentPrintName"></div>
+<div id="examDateTime"></div>
+
+<div id="name-container">
+  <h2>Enter your name to begin</h2>
+  <input type="text" id="studentNameInput" placeholder="Your Name" />
+  <button class="submit-button" onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<div id="quiz-container">
+
+  <h2> Quiz – 2. Newton’s First Law Inertia of rest Inertia of motion Inertia of direction</h2>
+  
+  <p><strong>Time Elapsed:</strong> <span id="timer">00:00</span></p>
+  <div id="questions-container"></div>
+
+  <div style="margin-top:30px;">
+    <button class="submit-button" onclick="finalSubmit()">Final Submit</button>
+    <button class="submit-button" onclick="printQuestions()">Print Questions</button>
+    <button class="submit-button" id="printScoreBtn" onclick="printScorecard()" style="display:none;">Save or Print Scorecard</button>
+    <!-- 🔹 WhatsApp button instead of PDF -->
+    <button class="submit-button" id="shareWhatsappBtn" style="display:none;">SHARE on WhatsApp</button>
+  </div>
+
+ <div id="scorecard">
+  <h3>Your Scorecard</h3>
+  <p id="scoreText"></p>
+  <table id="scoreTable" border="1" cellspacing="0" cellpadding="6" style="width:100%;border-collapse:collapse;margin-top:15px;">
+    <thead style="background:#333;color:#fff;">
+      <tr>
+        <th>Q.No</th>
+        <th>Question</th>
+        <th>Your Answer</th>
+        <th>Correct Answer</th>
+        <th>Result</th>
+        <th>Solution</th>
+      </tr>
+    </thead>
+    <tbody id="scoreDetails"></tbody>
+  </table>
+</div>
+
+<!-- 🔹 Floating Report Button -->
+<button id="reportBtn">Report Mistake</button>
+
+<!-- 🔹 Popup Modal -->
+<div id="reportModal">
+  <textarea id="reportMsg" placeholder="Describe the mistake..."></textarea>
+  <div style="text-align:right;">
+    <button id="sendReport">Send</button>
+    <button id="closeReport">Close</button>
+  </div>
+</div>
+
+<script>
+const Q = [
+  {
+    "id": "q1",
+    "text": "Which statement correctly expresses Newton’s First Law (law of inertia)?",
+    "options": [
+      "A body continues in its state of rest or uniform motion in a straight line unless acted upon by a net external force",
+      "Force is the rate of change of momentum",
+      "For every action there is an equal and opposite reaction",
+      "Every body attracts every other body"
+    ],
+    "correct": "A",
+    "solution": "Newton's First Law states that if the net external force on a body is zero, it remains at rest or continues with uniform velocity in a straight line — this defines inertia."
+  },
+  {
+    "id": "q2",
+    "text": "A passenger standing in a bus falls backwards when the bus suddenly starts. This phenomenon best illustrates:",
+    "options": [
+      "Inertia of motion",
+      "Inertia of direction",
+      "Inertia of rest",
+      "Conservation of momentum"
+    ],
+    "correct": "C",
+    "solution": "When the bus starts, the passenger's lower body is accelerated by the bus. The upper body tends to remain at rest (inertia of rest), so the passenger appears to fall backwards."
+  },
+  {
+    "id": "q3",
+    "text": "A passenger is thrown forward when a moving bus suddenly stops. This is an example of:",
+    "options": [
+      "Inertia of rest",
+      "Inertia of motion",
+      "Inertia of direction",
+      "Centripetal force"
+    ],
+    "correct": "B",
+    "solution": "When the bus stops, the passenger tends to continue in the previous state of motion → inertia of motion causes the passenger to lurch forward."
+  },
+  {
+    "id": "q4",
+    "text": "Which physical quantity is the quantitative measure of inertia of a body in classical mechanics?",
+    "options": [
+      "Momentum",
+      "Mass",
+      "Weight",
+      "Velocity"
+    ],
+    "correct": "B",
+    "solution": "Mass is the measure of inertia — it quantifies how much a body resists changes in its state of motion."
+  },
+  {
+    "id": "q5",
+    "text": "An astronaut in deep space (neglecting all external forces) pushes off a spacecraft gently. The astronaut continues moving at constant velocity. Which principle explains this?",
+    "options": [
+      "Newton's Third Law",
+      "Newton's First Law",
+      "Conservation of energy",
+      "Law of gravitation"
+    ],
+    "correct": "B",
+    "solution": "With no net external force, the astronaut continues in uniform motion — this is Newton's First Law (inertia)."
+  },
+  {
+    "id": "q6",
+    "text": "What is inertia of direction (often called directional inertia)?",
+    "options": [
+      "Tendency of a body to resist change of speed",
+      "Tendency of a body to resist change of direction of motion",
+      "Tendency of a body to remain at rest",
+      "Tendency of a body to change its mass"
+    ],
+    "correct": "B",
+    "solution": "Inertia of direction refers to the tendency of a moving body to continue moving along a straight line (resisting any change in direction)."
+  },
+  {
+    "id": "q7",
+    "text": "A cyclist takes a sharp turn and leans into the curve. The need to lean is primarily to counteract which aspect of inertia?",
+    "options": [
+      "Inertia of rest",
+      "Inertia of motion (magnitude)",
+      "Inertia of direction",
+      "Inertia of mass distribution"
+    ],
+    "correct": "C",
+    "solution": "The cyclist leans so that the resultant forces provide the required centripetal force; the tendency of the body to continue straight is the inertia of direction."
+  },
+  {
+    "id": "q8",
+    "text": "Two identical baseballs, A and B, are at rest. A has mass 0.15 kg, B has mass 0.30 kg. Which statement is correct about their inertias?",
+    "options": [
+      "A has greater inertia than B",
+      "B has greater inertia than A",
+      "Both have equal inertia",
+      "Inertia depends only on shape, not mass"
+    ],
+    "correct": "B",
+    "solution": "Inertia is measured by mass; the ball with mass 0.30 kg (B) has greater inertia than the 0.15 kg ball (A)."
+  },
+  {
+    "id": "q9",
+    "text": "Which one of the following is NOT a direct consequence of Newton’s First Law?",
+    "options": [
+      "Existence of inertial frames in which Newton's laws hold",
+      "A body with no net force moves with constant velocity",
+      "Net external force causes acceleration proportional to mass",
+      "An isolated body at rest remains at rest"
+    ],
+    "correct": "C",
+    "solution": "Statement C is Newton's Second Law (F = ma), not a direct consequence of the First Law."
+  },
+  {
+    "id": "q10",
+    "text": "A ball tied to a string is whirled in a circle and the string suddenly breaks. The ball flies off tangentially. This is explained by:",
+    "options": [
+      "Inertia of rest",
+      "Inertia of direction",
+      "Inertia of mass",
+      "Conservation of momentum"
+    ],
+    "correct": "B",
+    "solution": "When the centripetal force (string tension) is removed, the ball continues along the instantaneous direction of motion (tangent) — inertia of direction."
+  },
+  {
+    "id": "q11",
+    "text": "Which everyday example best illustrates inertia of rest?",
+    "options": [
+      "A cupboard resisting being pushed from rest",
+      "A rolling ball continuing to roll on a smooth floor",
+      "A satellite orbiting Earth",
+      "A car turning a corner"
+    ],
+    "correct": "A",
+    "solution": "A cupboard at rest resists the start of motion — a clear example of inertia of rest."
+  },
+  {
+    "id": "q12",
+    "text": "If the mass of a body is doubled, its inertia (in classical mechanics) becomes:",
+    "options": [
+      "Halved",
+      "Unchanged",
+      "Doubled",
+      "Quadrupled"
+    ],
+    "correct": "C",
+    "solution": "Inertia is proportional to mass; doubling mass doubles inertia."
+  },
+  {
+    "id": "q13",
+    "text": "Which statement correctly contrasts inertia of rest and inertia of motion?",
+    "options": [
+      "Inertia of rest resists change from rest; inertia of motion resists change from uniform motion",
+      "They are identical and refer only to mass",
+      "Inertia of rest is electromagnetic; inertia of motion is gravitational",
+      "Inertia of motion applies only to liquids"
+    ],
+    "correct": "A",
+    "solution": "Inertia of rest is the tendency to remain at rest; inertia of motion is the tendency to continue moving — both are aspects of inertia measured by mass."
+  },
+  {
+    "id": "q14",
+    "text": "A hockey puck slides on a frictionless ice surface. Which inertia concept explains why it continues moving at constant speed in a straight line?",
+    "options": [
+      "Inertia of rest",
+      "Inertia of motion",
+      "Inertia of direction",
+      "None of these"
+    ],
+    "correct": "B",
+    "solution": "The puck continues in uniform motion (same speed and direction) because of inertia of motion (no net external force to change it)."
+  },
+  {
+    "id": "q15",
+    "text": "A truck making a turn may tip over if its centre of mass shifts outside the wheelbase. Which inertia plays the primary role in initiating the tipping tendency (before moments are considered)?",
+    "options": [
+      "Inertia of rest",
+      "Inertia of motion",
+      "Inertia of direction",
+      "Inertia of rotation"
+    ],
+    "correct": "C",
+    "solution": "As the truck turns, the bodies in it tend to continue in straight-line motion (inertia of direction), producing a lateral effect that contributes to tipping if not balanced."
+  }
+]
+;
+
+
+
+let student = '';
+let timerHandle;
+let printMode = '';
+let examDateTime = '';
+
+/* 🔹 Extract Quiz Title */
+const quizTitle = document.title.split("Quiz")[1]?.trim() || document.title;
+
+function startQuiz() {
+  const name = document.getElementById('studentNameInput').value.trim();
+  if (!name) { alert('Please enter your name.'); return; }
+  student = name;
+  examDateTime = new Date().toLocaleString();
+  document.getElementById('name-container').style.display = 'none';
+  document.getElementById('quiz-container').style.display = 'block';
+  buildQuestions();
+  if (window.MathJax) MathJax.typesetPromise();
+  startTimer();
+}
+
+function buildQuestions() {
+  const out = document.getElementById('questions-container');
+  out.innerHTML = '';
+  Q.forEach((q, index) => {
+    const optionsHTML = q.options.map((opt, i) => {
+      const letter = String.fromCharCode(65 + i);
+      return `
+        <label class="option-item" for="${q.id}-${letter}">
+          <input type="radio" id="${q.id}-${letter}" name="${q.id}" value="${letter}" onchange="enableSubmit('${q.id}')">
+          ${letter}. ${opt}
+        </label>
+      `;
+    }).join('');
+    out.insertAdjacentHTML('beforeend', `
+      <div class="question" id="${q.id}-wrap">
+        <h3>Q${index + 1}. ${q.text}</h3>
+        <div class="options">${optionsHTML}</div>
+        <div id="${q.id}-buttons">
+          <button id="sub-${q.id}" class="submit-button" disabled onclick="grade('${q.id}')">Submit</button>
+          <button class="dontknow-button" onclick="skip('${q.id}')">I Don’t Know</button>
+        </div>
+        <button class="toggle-button" id="btn-sol-${q.id}" style="display:none;" onclick="toggleSolution('sol-${q.id}')">Show Solution</button>
+        <div class="solution" id="sol-${q.id}"><strong>Solution:</strong> ${q.solution}</div>
+      </div>
+    `);
+  });
+  if (window.MathJax) MathJax.typesetPromise(); // 🔹 Rerun MathJax
+}
+
+function enableSubmit(qid) { document.getElementById(`sub-${qid}`).disabled = false; }
+
+function grade(qid) {
+  const q = Q.find(x => x.id === qid);
+  const correct = q.correct;
+  const chosen = document.querySelector(`input[name="${qid}"]:checked`);
+  if (!chosen) return;
+
+  // lock all options for this question
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(i => i.disabled = true);
+
+  // get the label (row) element that wraps the chosen input
+  const chosenLabel = chosen.closest('label.option-item');
+
+  // find the input for the correct value and its label
+  const correctInput = document.querySelector(`input[name="${qid}"][value="${correct}"]`);
+  const correctLabel = correctInput ? correctInput.closest('label.option-item') : null;
+
+  if (chosen.value === correct) {
+    // correct → only chosen turns green
+    if (chosenLabel) {
+      chosenLabel.style.background = '#28a745';
+      chosenLabel.style.color = '#fff';
+    }
+  } else {
+    // wrong → chosen turns red, correct turns green
+    if (chosenLabel) {
+      chosenLabel.style.background = '#dc3545';
+      chosenLabel.style.color = '#fff';
+    }
+    if (correctLabel) {
+      correctLabel.style.background = '#28a745';
+      correctLabel.style.color = '#fff';
+    }
+  }
+
+  // show solution immediately
+  document.getElementById(`sol-${qid}`).style.display = "block";
+
+  // hide the buttons for this question
+  document.getElementById(`${qid}-buttons`).style.display = "none";
+  document.getElementById(`btn-sol-${qid}`).style.display = "none";
+}
+
+function skip(qid) {
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(r => r.disabled = true);
+  showSolutionButton(qid);
+}
+function showSolutionButton(qid) {
+  document.getElementById(`btn-sol-${qid}`).style.display = 'inline-block';
+  document.getElementById(`${qid}-buttons`).style.display = 'none';
+}
+function toggleSolution(id) {
+  const elem = document.getElementById(id);
+  elem.style.display = elem.style.display === 'block' ? 'none' : 'block';
+}
+
+function startTimer() {
+  const display = document.getElementById('timer');
+  const started = Date.now();
+  timerHandle = setInterval(() => {
+    const s = Math.floor((Date.now() - started) / 1000);
+    display.textContent = `${String((s / 60) | 0).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+  }, 1000);
+}
+
+function finalSubmit() {
+  clearInterval(timerHandle);
+
+  // 🔒 Disable all options after final submission
+  document.querySelectorAll("input[type=radio]").forEach(r => r.disabled = true);
+  document.querySelectorAll(".submit-button, .dontknow-button").forEach(btn => btn.style.display = "none");
+
+  let score = 0, detailHTML = '';
+  Q.forEach((q, index) => {
+    const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+    const chosen = checked ? checked.value : 'Not Answered';
+    const correct = (chosen === q.correct);
+    if (correct) score++;
+
+    detailHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${q.text}</td>
+        <td>${chosen}</td>
+        <td>${q.correct}</td>
+        <td>${correct ? '✅ Correct' : '❌ Incorrect'}</td>
+        <td>${q.solution}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('scoreText').innerText = `${student}, you scored ${score}/${Q.length}.`;
+  document.getElementById('scoreDetails').innerHTML = detailHTML;
+  document.getElementById('scorecard').style.display = 'block';
+  document.getElementById('printScoreBtn').style.display = 'inline-block';
+  document.getElementById('shareWhatsappBtn').style.display = 'inline-block';
+
+  if (window.MathJax) MathJax.typesetPromise(); // 🔹 Rerun MathJax
+}
+
+/* Print */
+function printQuestions() { printMode = "questions"; window.print(); }
+function printScorecard() {
+  document.getElementById("studentPrintName").innerText = student;
+  document.getElementById("examDateTime").innerText = "Exam Date & Time: " + examDateTime;
+  printMode = "scorecard"; window.print();
+}
+window.addEventListener('beforeprint', () => {
+  if (printMode === "questions") {
+    document.querySelector("#questions-container").style.display = "block";
+    document.querySelector("#scorecard").style.display = "none";
+    document.querySelector("#logo").style.display = "none";
+    document.querySelector("#name-container").style.display = "none";
+    document.querySelector("#timer").style.display = "none";
+    document.querySelector("#studentPrintName").style.display = "none";
+    document.querySelector("#examDateTime").style.display = "none";
+  }
+  if (printMode === "scorecard") {
+    document.querySelector("#questions-container").style.display = "none";
+    document.querySelector("#scorecard").style.display = "block";
+    document.querySelector("#logo").style.display = "block";
+    document.querySelector("#name-container").style.display = "none";
+    document.querySelector("#studentPrintName").style.display = "block";
+    document.querySelector("#examDateTime").style.display = "block";
+  }
+});
+window.addEventListener('afterprint', () => {
+  document.querySelector("#questions-container").style.display = "";
+  document.querySelector("#scorecard").style.display = "";
+  document.querySelector("#logo").style.display = "";
+  document.querySelector("#name-container").style.display = "";
+  document.querySelector("#timer").style.display = "";
+  document.querySelector("#studentPrintName").style.display = "none";
+  document.querySelector("#examDateTime").style.display = "none";
+});
+
+/* 🔹 WhatsApp Share */
+document.getElementById("shareWhatsappBtn").addEventListener("click", function () {
+  const whatsappNumber = "9108069409455"; // Must include country code (91 for India)
+  const scoreText = document.getElementById('scoreText').innerText;
+
+  let details = "Details:\n";
+  Q.forEach((q, i) => {
+    const qNum = i + 1;
+    const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+    const userAns = checked ? checked.value : "Not Answered";
+    const correctAns = q.correct;
+
+    if (userAns === correctAns) {
+      details += `Q${qNum} → ✅ Correct (Your Ans: ${userAns})\n`;
+    } else {
+      details += `Q${qNum} → ❌ Wrong (Your Ans: ${userAns} | Correct: ${correctAns})\n`;
+    }
+  });
+
+  const message = `Sir, I have shared my Test Result for checking. Thank you!\n\n📘 Quiz Title: ${quizTitle}\n👤 Student: ${student}\n${scoreText}\n\n${details}`;
+  const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  window.open(waUrl, "_blank");
+});
+
+/* 🔹 Report Mistake Button Logic */
+const reportBtn = document.getElementById("reportBtn");
+const reportModal = document.getElementById("reportModal");
+const sendReport = document.getElementById("sendReport");
+const closeReport = document.getElementById("closeReport");
+const reportMsg = document.getElementById("reportMsg");
+
+reportBtn.onclick = () => {
+  reportModal.style.display = "block";
+};
+closeReport.onclick = () => {
+  reportModal.style.display = "none";
+  reportMsg.value = "";
+};
+sendReport.onclick = () => {
+  const msg = reportMsg.value.trim();
+  if (!msg) { alert("Please write your message before sending."); return; }
+
+  const whatsappNumber = "9108069409455"; // with country code
+  const message = `⚠️ Reported Mistake\n\n📘 Quiz Title: ${quizTitle}\n👤 Student: ${student || "Anonymous"}\n\n📝 Message:\n${msg}`;
+
+  const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  window.open(waUrl, "_blank");
+
+  reportModal.style.display = "none";
+  reportMsg.value = "";
+};
+</script>
+
+</body>
+</html>

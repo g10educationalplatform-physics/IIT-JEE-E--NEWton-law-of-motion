@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title> Quiz – 4. Force- Various condition of force application Dimension Constant force Variable or dependent force Central force Conservative or non conservative force Common forces in mechanics</title>
+  <style>
+    body{font-family:Arial, sans-serif;padding:20px;background:#121212;color:#f0f0f0;}
+    #logo{display:block;margin:0 auto 25px;max-width:180px;}
+    #name-container{background:#1e1e1e;padding:30px;border-radius:6px;max-width:420px;margin:0 auto;}
+    #name-container input{width:100%;padding:10px;margin:10px 0 15px;border:none;border-radius:4px;font-size:16px;}
+    #quiz-container{display:none;}
+    .question{border:1px solid #333;padding:15px;margin-bottom:20px;border-radius:5px;background:#1e1e1e;}
+    .question h3{margin:0 0 10px;}
+    /* each option is a label-row: radio + text on same line, one option per row */
+    .option-item {
+      display: flex;                 /* radio + text in same line */
+      align-items: center;
+      gap: 8px;                      /* spacing between radio and text */
+      margin: 6px 0;                 /* space between options */
+      padding: 6px 8px;
+      border-radius: 4px;
+      background: #2a2a2a;
+      color: #ccc;
+      cursor: pointer;
+    }
+    .option-item input[type="radio"] {
+      margin: 0;                     /* no extra offset */
+    }
+    .submit-button,.toggle-button,.dontknow-button{margin-top:10px;padding:6px 12px;background:#007BFF;color:#fff;border:none;border-radius:4px;cursor:pointer;margin-right:5px;}
+    .solution{display:none;margin-top:10px;background:#2d2d2d;padding:10px;border-left:4px solid #28a745;}
+    #scorecard{background:#2d2d2d;padding:15px;border-radius:6px;margin-top:30px;display:none;}
+    #timer{font-weight:bold;color:#00ffcc;}
+    #studentPrintName{text-align:center;font-size:18px;font-weight:bold;margin-top:-15px;margin-bottom:5px;display:none;}
+    #examDateTime{text-align:center;font-size:14px;margin-bottom:20px;display:none;}
+    @media print {
+      body { background: #fff; color:#000; }
+      .submit-button, .dontknow-button, .toggle-button, #reportBtn, #reportModal { display:none !important; }
+      #name-container { display:none !important; }
+    }
+
+    /* 🔹 Floating Report Button */
+    #reportBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ff4757;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+
+    /* 🔹 Popup Modal */
+    #reportModal {
+      display: none;
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: #1e1e1e;
+      border: 1px solid #444;
+      padding: 15px;
+      border-radius: 8px;
+      width: 260px;
+      z-index: 1001;
+    }
+    #reportModal textarea {
+      width: 100%;
+      height: 80px;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      resize: none;
+      font-size: 14px;
+    }
+    #reportModal button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #sendReport { background: #28a745; color: white; }
+    #closeReport { background: #dc3545; color: white; margin-left: 5px; }
+  </style>
+  <!-- MathJax -->
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<img id="logo" src="https://i.ibb.co/WNZTWPwv/LOGO-PNG-2025-fab.png" alt="Logo" />
+
+<div id="studentPrintName"></div>
+<div id="examDateTime"></div>
+
+<div id="name-container">
+  <h2>Enter your name to begin</h2>
+  <input type="text" id="studentNameInput" placeholder="Your Name" />
+  <button class="submit-button" onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<div id="quiz-container">
+
+  <h2> Quiz – 4. Force- Various condition of force application Dimension Constant force Variable or dependent force Central force Conservative or non conservative force Common forces in mechanics</h2>
+  
+  <p><strong>Time Elapsed:</strong> <span id="timer">00:00</span></p>
+  <div id="questions-container"></div>
+
+  <div style="margin-top:30px;">
+    <button class="submit-button" onclick="finalSubmit()">Final Submit</button>
+    <button class="submit-button" onclick="printQuestions()">Print Questions</button>
+    <button class="submit-button" id="printScoreBtn" onclick="printScorecard()" style="display:none;">Save or Print Scorecard</button>
+    <!-- 🔹 WhatsApp button instead of PDF -->
+    <button class="submit-button" id="shareWhatsappBtn" style="display:none;">SHARE on WhatsApp</button>
+  </div>
+
+ <div id="scorecard">
+  <h3>Your Scorecard</h3>
+  <p id="scoreText"></p>
+  <table id="scoreTable" border="1" cellspacing="0" cellpadding="6" style="width:100%;border-collapse:collapse;margin-top:15px;">
+    <thead style="background:#333;color:#fff;">
+      <tr>
+        <th>Q.No</th>
+        <th>Question</th>
+        <th>Your Answer</th>
+        <th>Correct Answer</th>
+        <th>Result</th>
+        <th>Solution</th>
+      </tr>
+    </thead>
+    <tbody id="scoreDetails"></tbody>
+  </table>
+</div>
+
+<!-- 🔹 Floating Report Button -->
+<button id="reportBtn">Report Mistake</button>
+
+<!-- 🔹 Popup Modal -->
+<div id="reportModal">
+  <textarea id="reportMsg" placeholder="Describe the mistake..."></textarea>
+  <div style="text-align:right;">
+    <button id="sendReport">Send</button>
+    <button id="closeReport">Close</button>
+  </div>
+</div>
+
+<script>
+const Q = [
+  {
+    "id": "q1",
+    "text": "Which of the following best describes a force in mechanics?",
+    "options": [
+      "A scalar that depends only on mass",
+      "A vector having magnitude, direction and point of application",
+      "A quantity with only magnitude and point of application",
+      "A measure of energy"
+    ],
+    "correct": "B",
+    "solution": "Force is a vector quantity — it has magnitude, direction and a point (or line) of application; its effect depends on where and how it is applied."
+  },
+  {
+    "id": "q2",
+    "text": "What is the dimensional formula of force \\(F\\) in terms of mass (M), length (L) and time (T)?",
+    "options": [
+      "[M L T^{-2}]",
+      "[M L^{2} T^{-2}]",
+      "[M^{0} L T^{-1}]",
+      "[M L^{-1} T^{-2}]"
+    ],
+    "correct": "A",
+    "solution": "From Newton's second law \\(F=ma\\) and \\([a]=[L T^{-2}]\\), so \\([F]=[M][L T^{-2}]=[M L T^{-2}]\\)."
+  },
+  {
+    "id": "q3",
+    "text": "SI unit of force (Newton) is equivalent to which combination of base units?",
+    "options": [
+      "kg·m/s",
+      "kg·m/s^2",
+      "kg·m^2/s^2",
+      "N·m"
+    ],
+    "correct": "B",
+    "solution": "1 newton is defined as the force that gives 1 kg an acceleration of 1 m/s^2, so 1 N = 1 kg·m/s^2."
+  },
+  {
+    "id": "q4",
+    "text": "A constant horizontal force of 10 N acts on a 2 kg block for 3 s starting from rest. The change in linear momentum of the block is:",
+    "options": [
+      "6 kg·m/s",
+      "10 kg·m/s",
+      "20 kg·m/s",
+      "30 kg·m/s"
+    ],
+    "correct": "D",
+    "solution": "Impulse = FΔt = 10×3 = 30 N·s = Δp, so change in momentum = 30 kg·m/s."
+  },
+  {
+    "id": "q5",
+    "text": "A constant force \\(\\vec F=10\\,\\mathrm{N}\\) acts on an object and displaces it by 3 m in a direction making 60° with the force. Work done by the force is:",
+    "options": [
+      "0 J",
+      "15 J",
+      "30 J",
+      "60 J"
+    ],
+    "correct": "B",
+    "solution": "Work = F s cosθ = 10×3×cos60° = 30×0.5 = 15 J."
+  },
+  {
+    "id": "q6",
+    "text": "A spring with spring constant \\(k=200\\,\\mathrm{N/m}\\) is stretched from equilibrium by 0.10 m. The work done (stored potential energy) is:",
+    "options": [
+      "0.1 J",
+      "1.0 J",
+      "2.0 J",
+      "10 J"
+    ],
+    "correct": "B",
+    "solution": "Energy = \\(\\tfrac{1}{2}kx^2 = 0.5\\times200\\times(0.1)^2 = 1.0\\) J."
+  },
+  {
+    "id": "q7",
+    "text": "What is the dimensional formula of the spring constant \\(k\\) (from Hooke's law \\(F=kx\\))?",
+    "options": [
+      "[M L T^{-2}]",
+      "[M T^{-2}]",
+      "[M L^{-1} T^{-2}]",
+      "[M L^{0} T^{0}]"
+    ],
+    "correct": "B",
+    "solution": "Since \\([k]=[F]/[x] = [M L T^{-2}]/[L] = [M T^{-2}]\\)."
+  },
+  {
+    "id": "q8",
+    "text": "A variable force along x is given by \\(F(x)=k x^2\\) (\\(k=3\\,\\mathrm{N/m^2}\\)). The work done in moving the particle from x=0 to x=2 m is:",
+    "options": [
+      "4 J",
+      "6 J",
+      "8 J",
+      "12 J"
+    ],
+    "correct": "C",
+    "solution": "Work = \\(\\int_0^2 k x^2 dx = k x^3/3\\Big|_0^2 = 3\\times8/3 = 8\\) J."
+  },
+  {
+    "id": "q9",
+    "text": "Which of the following is a correct definition of a central force?",
+    "options": [
+      "A force that is always tangential to the path",
+      "A force whose magnitude depends only on speed",
+      "A force directed along the line joining the particle and a fixed point, and dependent only on distance",
+      "A force that does nonzero work around any closed path"
+    ],
+    "correct": "C",
+    "solution": "A central force is of the form \\(\\vec F(\\vec r)=f(r)\\hat r\\) — it acts along the radius vector and depends only on the separation r."
+  },
+  {
+    "id": "q10",
+    "text": "Which statement correctly distinguishes conservative and non-conservative forces?",
+    "options": [
+      "Conservative forces always do positive work; non-conservative always do negative work",
+      "Work done by conservative forces between two points is path-independent; for non-conservative forces it is path-dependent",
+      "Conservative forces depend on velocity, non-conservative do not",
+      "Only non-conservative forces can produce potential energy"
+    ],
+    "correct": "B",
+    "solution": "A conservative force has path-independent work and a potential function; non-conservative forces (like friction) produce path-dependent work."
+  },
+  {
+    "id": "q11",
+    "text": "Which mathematical condition (in a simply connected region) indicates a vector force field \\(\\vec F\\) is conservative?",
+    "options": [
+      "\\(\\nabla\\times\\vec F = 0\\)",
+      "\\(\\nabla\\cdot\\vec F = 0\\)",
+      "\\(\\int_A^B \\vec F\\cdot d\\vec r \\ne \\int_B^A \\vec F\\cdot d\\vec r\\)",
+      "No condition — all forces are conservative"
+    ],
+    "correct": "A",
+    "solution": "In a simply connected region a necessary and sufficient condition for \\(\\vec F=\\nabla\\phi\\) is \\(\\nabla\\times\\vec F=0\\)."
+  },
+  {
+    "id": "q12",
+    "text": "Which of the following forces is typically non-conservative?",
+    "options": [
+      "Gravitational force near earth",
+      "Linear spring force (Hooke's law)",
+      "Kinetic (sliding) friction",
+      "Electrostatic Coulomb force"
+    ],
+    "correct": "C",
+    "solution": "Kinetic friction dissipates mechanical energy as heat and the work done depends on path — it is non-conservative."
+  },
+  {
+    "id": "q13",
+    "text": "A constant resultant force applied on a particle of mass \\(m\\) produces:",
+    "options": [
+      "A constant displacement",
+      "A constant acceleration (if mass constant)",
+      "A variable mass",
+      "No acceleration"
+    ],
+    "correct": "B",
+    "solution": "From \\(F=ma\\), a constant net force on a constant mass yields constant acceleration."
+  },
+  {
+    "id": "q14",
+    "text": "A force given by \\(\\vec F= -k\\,\\vec r\\) (with \\(k>0\\)) is central and conservative. Which common mechanical system does this represent?",
+    "options": [
+      "Uniform gravitational attraction",
+      "Linear (ideal) spring force about equilibrium",
+      "Viscous drag",
+      "Magnetic Lorentz force"
+    ],
+    "correct": "B",
+    "solution": "Hooke's law near equilibrium: \\(\\vec F=-k\\vec r\\) is a central (radial) restoring force and conservative; it models an ideal spring."
+  },
+  {
+    "id": "q15",
+    "text": "A particle moves under a central inverse-square force \\(\\vec F=-k\\dfrac{\\hat r}{r^2}\\). The corresponding potential energy (up to an additive constant) is:",
+    "options": [
+      "\\(U(r)= -\\dfrac{k}{r}\\)",
+      "\\(U(r)= -kr\\)",
+      "\\(U(r)= +\\dfrac{k}{r^2}\\)",
+      "\\(U(r)= k r^2/2\\)"
+    ],
+    "correct": "A",
+    "solution": "For \\(F_r=-dU/dr=-k/r^2\\) ⇒ integrating gives \\(U(r)=-k/r + C\\)."
+  },
+  {
+    "id": "q16",
+    "text": "Which of the following lists common contact forces in mechanics?",
+    "options": [
+      "Gravitational, electrostatic, magnetic",
+      "Normal reaction, friction (static/kinetic), tension, applied contact forces",
+      "Centripetal, Coriolis, Lorentz",
+      "Viscous drag only"
+    ],
+    "correct": "B",
+    "solution": "Common contact forces include normal (reaction) force, friction (static and kinetic), tension in ropes, and externally applied push/pull at contact."
+  },
+  {
+    "id": "q17",
+    "text": "Max static friction \\(f_{s,max}\\) and kinetic friction \\(f_k\\) typically satisfy which relation (for the same contact surfaces)?",
+    "options": [
+      "f_k > f_{s,max}",
+      "f_k = f_{s,max}",
+      "f_k < f_{s,max}",
+      "No relation — depends only on speed"
+    ],
+    "correct": "C",
+    "solution": "Usually the limiting static friction is greater than kinetic friction: \\(f_k < f_{s,\\text{max}}\\). This is an empirical observation for common materials."
+  },
+  {
+    "id": "q18",
+    "text": "A 'couple' in mechanics is best described as:",
+    "options": [
+      "A single force causing translation only",
+      "A pair of equal and opposite forces whose lines of action do not coincide, producing pure rotation (net force zero, net moment nonzero)",
+      "A distributed force equated to a resultant",
+      "A force field produced by gravity"
+    ],
+    "correct": "B",
+    "solution": "A couple consists of two equal and opposite non-colinear forces; their resultant (net force) is zero but they produce a torque (moment) causing rotation."
+  },
+  {
+    "id": "q19",
+    "text": "How is the resultant of a distributed surface pressure (a continuous force distribution) on a body obtained?",
+    "options": [
+      "By multiplying maximum pressure by area",
+      "By vector integration (sum) of infinitesimal force elements over the surface",
+      "By taking the algebraic average of pressures",
+      "By dividing total pressure by volume"
+    ],
+    "correct": "B",
+    "solution": "The resultant force is found by integrating the local pressure (force per unit area) vectorially over the contact surface: \\(\\vec F_{res}=\\int_S p(\\vec r)\\,d\\vec A\\)."
+  },
+  {
+    "id": "q20",
+    "text": "Work done by the centripetal force on a particle in uniform circular motion over one complete revolution is:",
+    "options": [
+      "Positive and equal to mv^2",
+      "Negative and equal to -mv^2",
+      "Zero",
+      "Depends on radius"
+    ],
+    "correct": "C",
+    "solution": "Centripetal force is always perpendicular to instantaneous displacement (velocity), so \\(dW=\\vec F\\cdot d\\vec r=0\\) and total work over any path is zero."
+  },
+  {
+    "id": "q21",
+    "text": "For a light (massless), inextensible string connecting two masses, which statement about tension is correct (ideal string, no friction, single continuous string)?",
+    "options": [
+      "Tension is zero everywhere",
+      "Tension varies linearly with position along the string",
+      "Tension is the same at every point of the string",
+      "Tension depends only on the material of the string"
+    ],
+    "correct": "C",
+    "solution": "In an ideal massless, inextensible string with no friction the tension is uniform (same magnitude) along the string."
+  },
+  {
+    "id": "q22",
+    "text": "Given a one-dimensional conservative force \\(F(x)=-kx\\), the potential energy function (choosing \\(U(0)=0\\)) is:",
+    "options": [
+      "\\(U(x)= -kx\\)",
+      "\\(U(x)= \\tfrac{1}{2}kx^2\\)",
+      "\\(U(x)= kx^2\\)",
+      "\\(U(x)= -\\tfrac{1}{2}kx^2\\)"
+    ],
+    "correct": "B",
+    "solution": "For conservative forces \\(F=-dU/dx\\). Integrating \\(F=-kx\\) gives \\(U(x)=\\tfrac{1}{2}kx^2 + C\\). With \\(U(0)=0\\) we get \\(U=\\tfrac{1}{2}kx^2\\)."
+  },
+  {
+    "id": "q23",
+    "text": "A particle of mass 1 kg experiences a radial central force \\(F(r)=-k/r^2\\) with \\(k=10\\,\\mathrm{N·m^2}\\). If it is at r=2 m moving in a circle, the magnitude of required centripetal force is 5 N. Which statement is correct regarding whether this central force can provide the centripetal requirement?",
+    options": [
+      "Yes — the central force at r=2 m is 2.5 N and insufficient",
+      "Yes — the central force at r=2 m is 2.5 N and sufficient",
+      "No — the central force at r=2 m is 2.5 N and insufficient, so additional radial force needed",
+      "No — central forces cannot provide centripetal acceleration"
+    ],
+    "correct": "C",
+    "solution": "Here \\(|F|=k/r^2=10/4=2.5\\) N which is less than the needed 5 N, so the central force alone is insufficient and additional inward force would be required."
+  },
+  {
+    "id": "q24",
+    "text": "Which property correctly describes conservative forces with respect to mechanical energy?",
+    "options": [
+      "They convert mass to energy",
+      "They allow total mechanical energy (KE+PE) to be conserved in absence of non-conservative forces",
+      "They always do positive work",
+      "They always oppose motion"
+    ],
+    "correct": "B",
+    "solution": "In the absence of non-conservative forces (like friction), work done by conservative forces exchanges kinetic and potential energy but the total mechanical energy remains constant."
+  },
+  {
+    "id": "q25",
+    "text": "Which of the following is NOT usually considered a 'common force' in introductory mechanics problems?",
+    "options": [
+      "Normal reaction",
+      "Frictional force",
+      "Tension in a string",
+      "Nuclear strong force (between protons and neutrons in nucleus)"
+    ],
+    "correct": "D",
+    "solution": "The nuclear strong force acts at subatomic scales and is not a common force in classical mechanics problems; common forces include weight, normal, friction, tension, spring, and drag."
+  }
+]
+;
+
+
+
+let student = '';
+let timerHandle;
+let printMode = '';
+let examDateTime = '';
+
+/* 🔹 Extract Quiz Title */
+const quizTitle = document.title.split("Quiz")[1]?.trim() || document.title;
+
+function startQuiz() {
+  const name = document.getElementById('studentNameInput').value.trim();
+  if (!name) { alert('Please enter your name.'); return; }
+  student = name;
+  examDateTime = new Date().toLocaleString();
+  document.getElementById('name-container').style.display = 'none';
+  document.getElementById('quiz-container').style.display = 'block';
+  buildQuestions();
+  if (window.MathJax) MathJax.typesetPromise();
+  startTimer();
+}
+
+function buildQuestions() {
+  const out = document.getElementById('questions-container');
+  out.innerHTML = '';
+  Q.forEach((q, index) => {
+    const optionsHTML = q.options.map((opt, i) => {
+      const letter = String.fromCharCode(65 + i);
+      return `
+        <label class="option-item" for="${q.id}-${letter}">
+          <input type="radio" id="${q.id}-${letter}" name="${q.id}" value="${letter}" onchange="enableSubmit('${q.id}')">
+          ${letter}. ${opt}
+        </label>
+      `;
+    }).join('');
+    out.insertAdjacentHTML('beforeend', `
+      <div class="question" id="${q.id}-wrap">
+        <h3>Q${index + 1}. ${q.text}</h3>
+        <div class="options">${optionsHTML}</div>
+        <div id="${q.id}-buttons">
+          <button id="sub-${q.id}" class="submit-button" disabled onclick="grade('${q.id}')">Submit</button>
+          <button class="dontknow-button" onclick="skip('${q.id}')">I Don’t Know</button>
+        </div>
+        <button class="toggle-button" id="btn-sol-${q.id}" style="display:none;" onclick="toggleSolution('sol-${q.id}')">Show Solution</button>
+        <div class="solution" id="sol-${q.id}"><strong>Solution:</strong> ${q.solution}</div>
+      </div>
+    `);
+  });
+  if (window.MathJax) MathJax.typesetPromise(); // 🔹 Rerun MathJax
+}
+
+function enableSubmit(qid) { document.getElementById(`sub-${qid}`).disabled = false; }
+
+function grade(qid) {
+  const q = Q.find(x => x.id === qid);
+  const correct = q.correct;
+  const chosen = document.querySelector(`input[name="${qid}"]:checked`);
+  if (!chosen) return;
+
+  // lock all options for this question
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(i => i.disabled = true);
+
+  // get the label (row) element that wraps the chosen input
+  const chosenLabel = chosen.closest('label.option-item');
+
+  // find the input for the correct value and its label
+  const correctInput = document.querySelector(`input[name="${qid}"][value="${correct}"]`);
+  const correctLabel = correctInput ? correctInput.closest('label.option-item') : null;
+
+  if (chosen.value === correct) {
+    // correct → only chosen turns green
+    if (chosenLabel) {
+      chosenLabel.style.background = '#28a745';
+      chosenLabel.style.color = '#fff';
+    }
+  } else {
+    // wrong → chosen turns red, correct turns green
+    if (chosenLabel) {
+      chosenLabel.style.background = '#dc3545';
+      chosenLabel.style.color = '#fff';
+    }
+    if (correctLabel) {
+      correctLabel.style.background = '#28a745';
+      correctLabel.style.color = '#fff';
+    }
+  }
+
+  // show solution immediately
+  document.getElementById(`sol-${qid}`).style.display = "block";
+
+  // hide the buttons for this question
+  document.getElementById(`${qid}-buttons`).style.display = "none";
+  document.getElementById(`btn-sol-${qid}`).style.display = "none";
+}
+
+function skip(qid) {
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(r => r.disabled = true);
+  showSolutionButton(qid);
+}
+function showSolutionButton(qid) {
+  document.getElementById(`btn-sol-${qid}`).style.display = 'inline-block';
+  document.getElementById(`${qid}-buttons`).style.display = 'none';
+}
+function toggleSolution(id) {
+  const elem = document.getElementById(id);
+  elem.style.display = elem.style.display === 'block' ? 'none' : 'block';
+}
+
+function startTimer() {
+  const display = document.getElementById('timer');
+  const started = Date.now();
+  timerHandle = setInterval(() => {
+    const s = Math.floor((Date.now() - started) / 1000);
+    display.textContent = `${String((s / 60) | 0).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+  }, 1000);
+}
+
+function finalSubmit() {
+  clearInterval(timerHandle);
+
+  // 🔒 Disable all options after final submission
+  document.querySelectorAll("input[type=radio]").forEach(r => r.disabled = true);
+  document.querySelectorAll(".submit-button, .dontknow-button").forEach(btn => btn.style.display = "none");
+
+  let score = 0, detailHTML = '';
+  Q.forEach((q, index) => {
+    const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+    const chosen = checked ? checked.value : 'Not Answered';
+    const correct = (chosen === q.correct);
+    if (correct) score++;
+
+    detailHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${q.text}</td>
+        <td>${chosen}</td>
+        <td>${q.correct}</td>
+        <td>${correct ? '✅ Correct' : '❌ Incorrect'}</td>
+        <td>${q.solution}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('scoreText').innerText = `${student}, you scored ${score}/${Q.length}.`;
+  document.getElementById('scoreDetails').innerHTML = detailHTML;
+  document.getElementById('scorecard').style.display = 'block';
+  document.getElementById('printScoreBtn').style.display = 'inline-block';
+  document.getElementById('shareWhatsappBtn').style.display = 'inline-block';
+
+  if (window.MathJax) MathJax.typesetPromise(); // 🔹 Rerun MathJax
+}
+
+/* Print */
+function printQuestions() { printMode = "questions"; window.print(); }
+function printScorecard() {
+  document.getElementById("studentPrintName").innerText = student;
+  document.getElementById("examDateTime").innerText = "Exam Date & Time: " + examDateTime;
+  printMode = "scorecard"; window.print();
+}
+window.addEventListener('beforeprint', () => {
+  if (printMode === "questions") {
+    document.querySelector("#questions-container").style.display = "block";
+    document.querySelector("#scorecard").style.display = "none";
+    document.querySelector("#logo").style.display = "none";
+    document.querySelector("#name-container").style.display = "none";
+    document.querySelector("#timer").style.display = "none";
+    document.querySelector("#studentPrintName").style.display = "none";
+    document.querySelector("#examDateTime").style.display = "none";
+  }
+  if (printMode === "scorecard") {
+    document.querySelector("#questions-container").style.display = "none";
+    document.querySelector("#scorecard").style.display = "block";
+    document.querySelector("#logo").style.display = "block";
+    document.querySelector("#name-container").style.display = "none";
+    document.querySelector("#studentPrintName").style.display = "block";
+    document.querySelector("#examDateTime").style.display = "block";
+  }
+});
+window.addEventListener('afterprint', () => {
+  document.querySelector("#questions-container").style.display = "";
+  document.querySelector("#scorecard").style.display = "";
+  document.querySelector("#logo").style.display = "";
+  document.querySelector("#name-container").style.display = "";
+  document.querySelector("#timer").style.display = "";
+  document.querySelector("#studentPrintName").style.display = "none";
+  document.querySelector("#examDateTime").style.display = "none";
+});
+
+/* 🔹 WhatsApp Share */
+document.getElementById("shareWhatsappBtn").addEventListener("click", function () {
+  const whatsappNumber = "9108069409455"; // Must include country code (91 for India)
+  const scoreText = document.getElementById('scoreText').innerText;
+
+  let details = "Details:\n";
+  Q.forEach((q, i) => {
+    const qNum = i + 1;
+    const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+    const userAns = checked ? checked.value : "Not Answered";
+    const correctAns = q.correct;
+
+    if (userAns === correctAns) {
+      details += `Q${qNum} → ✅ Correct (Your Ans: ${userAns})\n`;
+    } else {
+      details += `Q${qNum} → ❌ Wrong (Your Ans: ${userAns} | Correct: ${correctAns})\n`;
+    }
+  });
+
+  const message = `Sir, I have shared my Test Result for checking. Thank you!\n\n📘 Quiz Title: ${quizTitle}\n👤 Student: ${student}\n${scoreText}\n\n${details}`;
+  const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  window.open(waUrl, "_blank");
+});
+
+/* 🔹 Report Mistake Button Logic */
+const reportBtn = document.getElementById("reportBtn");
+const reportModal = document.getElementById("reportModal");
+const sendReport = document.getElementById("sendReport");
+const closeReport = document.getElementById("closeReport");
+const reportMsg = document.getElementById("reportMsg");
+
+reportBtn.onclick = () => {
+  reportModal.style.display = "block";
+};
+closeReport.onclick = () => {
+  reportModal.style.display = "none";
+  reportMsg.value = "";
+};
+sendReport.onclick = () => {
+  const msg = reportMsg.value.trim();
+  if (!msg) { alert("Please write your message before sending."); return; }
+
+  const whatsappNumber = "9108069409455"; // with country code
+  const message = `⚠️ Reported Mistake\n\n📘 Quiz Title: ${quizTitle}\n👤 Student: ${student || "Anonymous"}\n\n📝 Message:\n${msg}`;
+
+  const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  window.open(waUrl, "_blank");
+
+  reportModal.style.display = "none";
+  reportMsg.value = "";
+};
+</script>
+
+</body>
+</html>
